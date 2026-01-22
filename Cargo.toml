@@ -1,11 +1,11 @@
 [package]
 name = "easy-db"                                                                                            # Kütüphanenin ismi
-version = "0.1.0"                                                                                           # İlk sürüm numaran
+version = "0.2.1"                                                                                           # İlk sürüm numaran
 edition = "2021"
 authors = ["Ferivonus <ferivonus@hotmail.com>"]
 description = "A library that instantly turns SQLite tables into a secure REST API with a built-in client."
 license = "MIT"                                                                                             # En yaygın açık kaynak lisansı
-repository = "https://github.com/kullanici_adin/easy-db"
+repository = "https://github.com/Ferivonus/easy-db-rust"
 readme = "README.md"                                                                                        # İnsanların ne yapacağını anlattığın dosya
 
 [dependencies]
