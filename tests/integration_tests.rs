@@ -4,11 +4,11 @@ use std::collections::HashMap;
 use std::time::Duration;
 use tokio::time::sleep;
 
-/// Helper: Test için bir sunucuyu arka planda başlatır.
+/// Helper: Starts a test server in the background for integration testing.
 async fn start_test_server(port: u16, db_name: &str) {
     let mut db = EasyDB::init(db_name).expect("Failed to init DB");
 
-    // Test tablolarını oluştur
+    // Create test tables
     db.create_table(
         "students",
         "id INTEGER PRIMARY KEY, name TEXT, age INTEGER, gpa REAL",
@@ -22,7 +22,7 @@ async fn start_test_server(port: u16, db_name: &str) {
         let _ = db.run_server(port).await;
     });
 
-    // Sunucunun hazır olması için bekle
+    // Wait for the server to be ready
     sleep(Duration::from_millis(300)).await;
 }
 
@@ -35,13 +35,13 @@ async fn test_professional_crud_flow() {
     let client = EasyClient::new("localhost", port);
 
     // --- 1. CREATE TEST (POST) ---
-    // Veri ekleme testi
+    // Testing data insertion
     let student = json!({"name": "John Doe", "age": 20, "gpa": 3.5});
     let res = client.post("students", student).await.expect("POST failed");
     assert_eq!(res["status"], "success");
 
     // --- 2. READ & FILTER TEST (GET) ---
-    // Eklenen veriyi isme göre filtreleyip çekme ve ID'sini bulma
+    // Fetch and filter the added data by name to retrieve its ID
     let mut params = HashMap::new();
     params.insert("name", "John Doe");
     let results = client
@@ -53,11 +53,11 @@ async fn test_professional_crud_flow() {
     assert_eq!(list.len(), 1);
     assert_eq!(list[0]["name"], "John Doe");
 
-    // John'un ID'sini alıyoruz (Update ve Delete için lazım)
+    // Retrieve John's ID (needed for subsequent Update and Delete tests)
     let john_id = list[0]["id"].as_i64().expect("ID not found");
 
     // --- 3. UPDATE TEST (PUT) ---
-    // Artık EasyClient.put metodunu kullanıyoruz
+    // Utilizing the newly implemented EasyClient.put method
     let updated_data = json!({"age": 21, "gpa": 3.8});
     let update_res = client
         .put("students", john_id, updated_data)
@@ -67,7 +67,7 @@ async fn test_professional_crud_flow() {
     assert_eq!(update_res["status"], "success");
 
     // --- 4. ADVANCED QUERY TEST (SORTING) ---
-    // Sıralama testi için ek veriler girelim
+    // Insert additional data to verify sorting logic
     client
         .post("students", json!({"name": "Alice", "age": 22, "gpa": 3.9}))
         .await
@@ -79,18 +79,18 @@ async fn test_professional_crud_flow() {
 
     let mut sort_params = HashMap::new();
     sort_params.insert("_sort", "age");
-    sort_params.insert("_order", "desc"); // Yaşa göre büyükten küçüğe
+    sort_params.insert("_order", "desc"); // Sort by age descending
 
     let sorted_results = client.get("students", Some(sort_params)).await.unwrap();
     let sorted_list = sorted_results.as_array().unwrap();
 
-    // Alice (22) en üstte olmalı
+    // Alice (22) should be at the top of the list
     assert_eq!(sorted_list[0]["name"], "Alice");
-    // Bob (19) en altta olmalı
+    // Bob (19) should be at the bottom of the list
     assert_eq!(sorted_list.last().unwrap()["name"], "Bob");
 
     // --- 5. DELETE TEST (DELETE) ---
-    // EasyClient.delete metodunu kullanıyoruz
+    // Utilizing the newly implemented EasyClient.delete method
     let del_res = client
         .delete("students", john_id)
         .await
@@ -98,14 +98,14 @@ async fn test_professional_crud_flow() {
     assert_eq!(del_res["status"], "success");
 
     // --- 6. ERROR HANDLING (404 Not Found) ---
-    // Olmayan bir ID silinmeye çalışıldığında hata mesajı dönmeli
+    // Verifying that deleting a non-existent ID returns an error message
     let fake_del_res = client
         .delete("students", 9999)
         .await
         .expect("Fake DELETE failed");
 
-    // lib.rs içinde 404 durumunda {"error": "Record not found"} dönüyor
+    // According to lib.rs, a 404 returns {"error": "Record not found"}
     assert_eq!(fake_del_res["error"], "Record not found");
 
-    println!("🚀 Tüm profesyonel test senaryoları (CRUD + Sort + Error) başarıyla geçti!");
+    println!("🚀 All professional test scenarios (CRUD + Sort + Error) passed successfully!");
 }
