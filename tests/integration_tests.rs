@@ -29,7 +29,7 @@ async fn start_test_server(port: u16, db_name: &str) {
 #[tokio::test]
 async fn test_professional_crud_flow() {
     let port = 9600;
-    let db_name = "pro_test_db";
+    let db_name = "test_db";
     start_test_server(port, db_name).await;
 
     let client = EasyClient::new("localhost", port);
