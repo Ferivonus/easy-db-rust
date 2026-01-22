@@ -1,0 +1,19 @@
+[package]
+name = "easy-db"                                                                                            # Kütüphanenin ismi
+version = "0.1.0"                                                                                           # İlk sürüm numaran
+edition = "2021"
+authors = ["Ferivonus <ferivonus@hotmail.com>"]
+description = "A library that instantly turns SQLite tables into a secure REST API with a built-in client."
+license = "MIT"                                                                                             # En yaygın açık kaynak lisansı
+repository = "https://github.com/kullanici_adin/easy-db"
+readme = "README.md"                                                                                        # İnsanların ne yapacağını anlattığın dosya
+
+[dependencies]
+axum = "0.8.8"
+tokio = { version = "1.49.0", features = ["full"] }
+rusqlite = { version = "0.38.0", features = ["bundled"] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
+anyhow = "1.0.100"
+tower-http = { version = "0.6.8", features = ["cors"] }
+reqwest = { version = "0.13.1", features = ["json"] }
