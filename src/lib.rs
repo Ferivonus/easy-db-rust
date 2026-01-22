@@ -84,8 +84,10 @@ impl EasyDB {
                         move |j| handle_post(State(s), t, j)
                     }),
                 )
+                // FIX: Changed from /:id to /{id} for Axum 0.7 compatibility
+                // Note: We use double braces {{id}} to escape them in format! macro
                 .route(
-                    &format!("/{}/:id", t),
+                    &format!("/{}/{{id}}", t),
                     put({
                         let t = t.clone();
                         let s = Arc::clone(&state);
@@ -93,7 +95,7 @@ impl EasyDB {
                     }),
                 )
                 .route(
-                    &format!("/{}/:id", t),
+                    &format!("/{}/{{id}}", t),
                     delete({
                         let t = t.clone();
                         let s = Arc::clone(&state);
